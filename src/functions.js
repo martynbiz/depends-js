@@ -13,9 +13,13 @@ export const appendStyle = (href) => {
   } else {
     console.log(`Unexpected type for href:`, href);
   }
+  
+  var link = document.createElement('link');
+
+  // set defaults
+  link.rel = "stylesheet";
 
   // create <link> element
-  var link = document.createElement('link');
   for (let key in attr) {
     if (attr.hasOwnProperty(key)) {
       link.setAttribute(key, attr[key]);
@@ -44,9 +48,14 @@ export const appendScript = (src) => {
   } else {
     console.log(`Unexpected type for src:`, src);
   }
+  
+  var script = document.createElement('script');
+
+  // set defaults
+  script.defer = true;
+  script.async = true;
 
   // create <script> element
-  var script = document.createElement('script');
   for (let key in attr) {
     if (attr.hasOwnProperty(key)) {
       script.setAttribute(key, attr[key]);

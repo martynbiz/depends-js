@@ -154,16 +154,6 @@ class Depends {
       
   }
 
-  // /**
-  //  * Load dependencies will load styles and scripts for each 
-  //  * @param {array} dependencies 
-  //  */
-  // loadDependency(dependencies) {
-  //   for (const dependency of dependencies) {
-  //     this.loadDependency(dependency);
-  //   }
-  // }
-
   /**
    * Load a <script> tag every time called
    * @param {string} id 
@@ -182,7 +172,10 @@ class Depends {
       this.pendingCallbacks.push([name, src, dependencies]);    
     } else {
       this.loadDependency(dependencies);
-      appendScript(src);
+      // appendScript(src);
+      this.pendingCallbacks.push([name, () => {
+        appendScript(src);
+      }, dependencies]);    
     }
 
     // set to is loading
