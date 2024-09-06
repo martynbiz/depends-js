@@ -103,7 +103,6 @@ depends.load("featured-new", {
   "data-random": "peanut butter curry",
 }, ["jquery@3.0"]);
 ```
-```
 
 ## Queue callback
 
