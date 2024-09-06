@@ -67,7 +67,7 @@ QUnit.module('depends', function(hooks) {
         },
       }
     });
-    depends.loadDependencies(["dep1", "dep2"]);
+    depends.loadDependency(["dep1", "dep2"]);
 
     // assert
     const scripts = getScripts();
@@ -77,14 +77,14 @@ QUnit.module('depends', function(hooks) {
 
   });
   
-  QUnit.test('test loadDependencies', function(assert) {
+  QUnit.test('test loadDependency', function(assert) {
     
     // test
     depends.register({
       "dep1": "js/dep1.js",
       "dep2": "js/dep2.js",
     });
-    depends.loadDependencies(["dep1", "dep2"]);
+    depends.loadDependency(["dep1", "dep2"]);
 
     // assert
     const scripts = getScripts();
@@ -442,7 +442,7 @@ QUnit.module('depends', function(hooks) {
 //     assert.equal(typeof scriptTagDependencyManager === "object", true, "ScriptTagDependencyManager has been instantiated");
 //   });
 
-//   QUnit.test('Test loadDependencies order of <script> tags', function (assert) {
+//   QUnit.test('Test loadDependency order of <script> tags', function (assert) {
 //     const scriptTagDependencyManager = new ScriptTagDependencyManager({
 //       "jquery@3.4.1": {
 //         "attr": {
@@ -495,10 +495,10 @@ QUnit.module('depends', function(hooks) {
 
 //     // jquery as bootstrap's first dependency will append, but there will be a delay in loading 
 //     // in which time vue will be appended. These will be followed by popper and bootstrap ITO
-//     scriptTagDependencyManager.loadDependencies(["bootstrap@4.0.0", "vue@2"]);
+//     scriptTagDependencyManager.loadDependency(["bootstrap@4.0.0", "vue@2"]);
 //   });
 
-//   QUnit.test('Test loadDependencies sets attributes', function (assert) {
+//   QUnit.test('Test loadDependency sets attributes', function (assert) {
 //     const scriptTagDependencyManager = new ScriptTagDependencyManager({
 //       "jquery@3.4.1": {
 //         "attr": {
@@ -522,7 +522,7 @@ QUnit.module('depends', function(hooks) {
 //       done()
 //     });
 
-//     scriptTagDependencyManager.loadDependencies(["jquery@3.4.1"]);
+//     scriptTagDependencyManager.loadDependency(["jquery@3.4.1"]);
 //   });
 
 //   QUnit.test('Test registerCallback loads dependencies', function (assert) {

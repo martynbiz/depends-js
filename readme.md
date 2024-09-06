@@ -18,7 +18,7 @@ Register a single dependency for other scripts to reference. When a string is th
 
 ```javascript
 depends.register({
-  "vue@3": "https://unpkg.com/vue@3/dist/vue.global.js",
+  "vue": "https://unpkg.com/vue@3/dist/vue.global.js",
 });
 ```
 
@@ -66,7 +66,7 @@ depends.register({
   ...
   "isotope@2.0": {
     "script": "https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.0.1/isotope.pkgd.min.js",
-    "dependencies": ["jquery@3.0"],
+    "dependencies": ["jquery"],
   }
 });
 ```
@@ -92,7 +92,7 @@ depends.register({
 We can let load handle loading dependencies automatically. 
 
 ```javascript
-depends.load("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
+depends.load("featured-new", "js/featured-news.bundle.js", ["jquery"]);
 ```
 
 Or as an object:
@@ -101,7 +101,7 @@ Or as an object:
 depends.load("featured-new", {
   "src": "js/featured-news.bundle.js",
   "data-random": "peanut butter curry",
-}, ["jquery@3.0"]);
+}, ["jquery"]);
 ```
 
 ## Queue callback
@@ -111,7 +111,7 @@ Callback will only run after dependencies loaded
 ```javascript
 depends.load("featured-new", () => {
   // code here
-}, ["jquery@3.0"]);
+}, ["jquery"]);
 ```
 
 ## loadOnce
@@ -121,11 +121,11 @@ Append a `<script>` or queue callback once only
 ```javascript
 depends.loadOnce("global", { // appended
   "src": "js/global.js",
-}, ["jquery@3.4.1"]);
+}, ["jquery"]);
 
 depends.loadOnce("global", { // ignored, global already appended
   "src": "js/global.js",
-}, ["jquery@3.4.1"]);
+}, ["jquery"]);
 ```
 
 ## Load dependency
@@ -133,13 +133,13 @@ depends.loadOnce("global", { // ignored, global already appended
 Dependencies can be manually loaded instead rather than loading as a dependency of a script/callback. This is only required when a dependency must be loaded regardless if a script needs it. Otherwise, just allow dependencies to be loaded on a need by need basis.
 
 ```javascript
-depends.loadDependency("jquery@3.0");
+depends.loadDependency("jquery");
 ```
 
 Or, as an array:
 
 ```javascript
-depends.loadDependency(["jquery@3.0"]);
+depends.loadDependency(["jquery", "vue"]);
 ```
 
 ## Local development

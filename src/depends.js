@@ -75,83 +75,94 @@ class Depends {
    */
   loadDependency(dependency, cb = () => {}) {
 
-    // check dependency is not already loadedStatus
-    if (dependency in this.loadedStatus) {
-      return;
+    const dependencies = [];
+    if (typeof dependency === "string") {
+      dependencies.push(dependency)
+    } else if (Array.isArray(dependency)) {
+      dependencies.push(...dependency)
     }
 
-    // get dependency data 
-    const dependencySrc = this.dependencies[dependency];
-    
-    const loadingScripts = [];
-    const loadingStyles = [];
-
-    // check if dependencySrc is string, or object
-    if (typeof dependencySrc === 'string') {
-      loadingScripts.push(dependencySrc);
-    } else if (typeof dependencySrc === 'object' && dependencySrc !== null && !Array.isArray(dependencySrc)) {
-      
-      // check loadingStyles, might be undefined
-      if ("style" in dependencySrc) {
-        if (Array.isArray(dependencySrc.style)) {
-          loadingStyles.push(...dependencySrc.style);
-        } else {
-          loadingStyles.push(dependencySrc.style);
-        }
-      }
-
-      // check loadingScripts, might be undefined
-      if ("script" in dependencySrc) {
-        if (Array.isArray(dependencySrc.script)) {
-          loadingScripts.push(...dependencySrc.script);
-        } else {
-          loadingScripts.push(dependencySrc.script);
-        }
-      }
-
-      // load this dependency's dependencies
-      if ("dependencies" in dependencySrc) {
-        for (const name of dependencySrc.dependencies) {
-          this.loadDependency(name);
-        }
-      }
-      
-    } else {
-      console.log("Invalid type for registered dependency. Expected a string or an object. ", dependencySrc);
-    }
-
-    // append this style now dependencies have been loaded
-    for (const style of loadingStyles) {
-      const linkTag = appendStyle(style);
-      linkTag.addEventListener('load', () => {
-        loadingStyles.splice(loadingStyles.indexOf(style), 1);
-        this.#checkLoaded(dependency, loadingStyles, loadingScripts);
-      });
-    }
-
-    // append this script now dependencies have been loaded
-    for (const script of loadingScripts) {
-      const scriptTag = appendScript(script);
-      scriptTag.addEventListener('load', () => {
-        loadingScripts.splice(loadingScripts.indexOf(script), 1);
-        this.#checkLoaded(dependency, loadingStyles, loadingScripts);
-      });
-    }
-
-    // set loaded to false
-    this.loadedStatus[dependency] = false;
-      
-  }
-
-  /**
-   * Load dependencies will load styles and scripts for each 
-   * @param {array} dependencies 
-   */
-  loadDependencies(dependencies) {
     for (const dependency of dependencies) {
-      this.loadDependency(dependency);
+
+      // check dependency is not already loadedStatus
+      if (dependency in this.loadedStatus) {
+        continue;
+      }
+  
+      // get dependency data 
+      const dependencySrc = this.dependencies[dependency];
+      
+      const loadingScripts = [];
+      const loadingStyles = [];
+  
+      // check if dependencySrc is string, or object
+      if (typeof dependencySrc === 'string') {
+        loadingScripts.push(dependencySrc);
+      } else if (typeof dependencySrc === 'object' && dependencySrc !== null && !Array.isArray(dependencySrc)) {
+        
+        // check loadingStyles, might be undefined
+        if ("style" in dependencySrc) {
+          if (Array.isArray(dependencySrc.style)) {
+            loadingStyles.push(...dependencySrc.style);
+          } else {
+            loadingStyles.push(dependencySrc.style);
+          }
+        }
+  
+        // check loadingScripts, might be undefined
+        if ("script" in dependencySrc) {
+          if (Array.isArray(dependencySrc.script)) {
+            loadingScripts.push(...dependencySrc.script);
+          } else {
+            loadingScripts.push(dependencySrc.script);
+          }
+        }
+  
+        // load this dependency's dependencies
+        if ("dependencies" in dependencySrc) {
+          for (const name of dependencySrc.dependencies) {
+            this.loadDependency(name);
+          }
+        }
+        
+      } else {
+        console.log("Invalid type for registered dependency. Expected a string or an object. ", dependencySrc);
+      }
+  
+      // append this style now dependencies have been loaded
+      for (const style of loadingStyles) {
+        const linkTag = appendStyle(style);
+        linkTag.addEventListener('load', () => {
+          loadingStyles.splice(loadingStyles.indexOf(style), 1);
+          this.#checkLoaded(dependency, loadingStyles, loadingScripts);
+        });
+      }
+  
+      // append this script now dependencies have been loaded
+      for (const script of loadingScripts) {
+        const scriptTag = appendScript(script);
+        scriptTag.addEventListener('load', () => {
+          loadingScripts.splice(loadingScripts.indexOf(script), 1);
+          this.#checkLoaded(dependency, loadingStyles, loadingScripts);
+        });
+      }
+  
+      // set loaded to false
+      this.loadedStatus[dependency] = false;
+      
     }
+      
   }
+
+  // /**
+  //  * Load dependencies will load styles and scripts for each 
+  //  * @param {array} dependencies 
+  //  */
+  // loadDependency(dependencies) {
+  //   for (const dependency of dependencies) {
+  //     this.loadDependency(dependency);
+  //   }
+  // }
 
   /**
    * Load a <script> tag every time called
@@ -167,10 +178,10 @@ class Depends {
 
     // append this script now dependencies have been loaded
     if (typeof src === "function") {      
-      this.loadDependencies(dependencies);
+      this.loadDependency(dependencies);
       this.pendingCallbacks.push([name, src, dependencies]);    
     } else {
-      this.loadDependencies(dependencies);
+      this.loadDependency(dependencies);
       appendScript(src);
     }
 
