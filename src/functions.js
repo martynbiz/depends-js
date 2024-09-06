@@ -2,7 +2,7 @@
  * 
  * @param {str|object} src 
  */
-export const appendStyle = (name, href) => {
+export const appendStyle = (href) => {
 
   // handle href as a string or an object
   const attr = {};
@@ -25,13 +25,15 @@ export const appendStyle = (name, href) => {
   // append to body
   document.head.appendChild(link);
 
+  return link;
+
 }
 
 /**
  * 
  * @param {str|object} src 
  */
-export const appendScript = (name, src) => {
+export const appendScript = (src) => {
 
   // handle src as a string or an object
   const attr = {};
@@ -53,5 +55,7 @@ export const appendScript = (name, src) => {
 
   // append to body
   document.body.appendChild(script);
+
+  return script;
 
 }

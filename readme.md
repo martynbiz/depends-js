@@ -98,24 +98,32 @@ depends.setLoaded(["bootstrap@5.2", "jquery@3.0"]);
 Load script with no dependencies
 
 ```javascript
-depends.loadScript("featured-new", "js/featured-news.bundle.js");
+depends.load("featured-new", "js/featured-news.bundle.js");
 ```
 
 Or as an object:
 
 ```javascript
-depends.loadScript("featured-new", {
+depends.load("featured-new", {
   "src": "js/featured-news.bundle.js",
   "data-random": "peanut butter curry",
 });
 ```
 
-We can let loadScript handle loading dependencies automatically. 
+We can let load handle loading dependencies automatically. 
 
 The following will first append dependencies (only if another script hasn't appended it already) then append featured-new script:
 
 ```javascript
-depends.loadScript("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
+depends.load("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
+```
+
+Or run code that has dependencies:
+
+```javascript
+depends.load("featured-new", () => {
+  // code here
+}, ["jquery@3.0"]);
 ```
 
 ## Load dependency

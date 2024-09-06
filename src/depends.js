@@ -2,8 +2,15 @@ import { appendStyle, appendScript } from "./functions";
 
 class Depends {
   constructor() {
+
+    // registered 
     this.dependencies = {};
-    this.loaded = [];
+
+    // loadedStatus to dom 
+    this.loadedStatus = {};
+
+    // loadedStatus to dom 
+    this.pendingCallbacks = [];
   }
 
   /**
@@ -11,7 +18,7 @@ class Depends {
    */
   reset() {
     this.dependencies = {};
-    this.loaded = [];
+    this.loadedStatus = {};
   }
 
   /**
@@ -26,42 +33,79 @@ class Depends {
   }
 
   /**
-   * Load dependencies will load styles and scripts for each 
+   * Will check if a given array of dependencies is loaded
    * @param {array} dependencies 
    */
-  loadDependency(dependency) {
+  #hasDependencies(dependencies) {
+    for (const dependency of dependencies) {
+      if (!(dependency in this.loadedStatus) || this.loadedStatus[dependency] !== true) {
+        return false;
+      }
+    }
+    return true;
+  }
 
-    // check dependency is not already loaded
-    if (this.loaded.includes(dependency)) {
+  /**
+   * this function will set dep loading status when all have been loaded
+   * @param {array} loadingStyles 
+   * @param {array} loadingScripts 
+   */
+  #checkLoaded(dependency, loadingStyles, loadingScripts) {    
+    
+    // set loaded status true if all assets have loaded
+    this.loadedStatus[dependency] = (loadingStyles.length + loadingScripts.length === 0);
+    
+    // check pending callbacks
+    for (let i = 0; i < this.pendingCallbacks.length; i++) {
+      const pendingCallback = this.pendingCallbacks.shift();
+      const [name, cb, dependencies] = pendingCallback;
+      if (this.#hasDependencies(dependencies)) {
+        cb();
+        this.loadedStatus[name] = true;
+      } else {
+        this.pendingCallbacks.push(pendingCallback);
+      }
+    }
+  }
+
+  /**
+   * Load dependencies will load styles and scripts for each 
+   * @param {array} dependencies 
+   * @param {function} callback Run when dependencies loaded 
+   */
+  loadDependency(dependency, cb = () => {}) {
+
+    // check dependency is not already loadedStatus
+    if (dependency in this.loadedStatus) {
       return;
     }
 
     // get dependency data 
     const dependencySrc = this.dependencies[dependency];
     
-    const scripts = [];
-    const styles = [];
+    const loadingScripts = [];
+    const loadingStyles = [];
 
     // check if dependencySrc is string, or object
     if (typeof dependencySrc === 'string') {
-      scripts.push(dependencySrc);
+      loadingScripts.push(dependencySrc);
     } else if (typeof dependencySrc === 'object' && dependencySrc !== null && !Array.isArray(dependencySrc)) {
       
-      // check styles, might be undefined
+      // check loadingStyles, might be undefined
       if ("style" in dependencySrc) {
         if (Array.isArray(dependencySrc.style)) {
-          styles.push(...dependencySrc.style);
+          loadingStyles.push(...dependencySrc.style);
         } else {
-          styles.push(dependencySrc.style);
+          loadingStyles.push(dependencySrc.style);
         }
       }
 
-      // check scripts, might be undefined
+      // check loadingScripts, might be undefined
       if ("script" in dependencySrc) {
         if (Array.isArray(dependencySrc.script)) {
-          scripts.push(...dependencySrc.script);
+          loadingScripts.push(...dependencySrc.script);
         } else {
-          scripts.push(dependencySrc.script);
+          loadingScripts.push(dependencySrc.script);
         }
       }
 
@@ -77,16 +121,25 @@ class Depends {
     }
 
     // append this style now dependencies have been loaded
-    for (const style of styles) {
-      appendStyle(name, style);
+    for (const style of loadingStyles) {
+      const linkTag = appendStyle(style);
+      linkTag.addEventListener('load', () => {
+        loadingStyles.splice(loadingStyles.indexOf(style), 1);
+        this.#checkLoaded(dependency, loadingStyles, loadingScripts);
+      });
     }
 
     // append this script now dependencies have been loaded
-    for (const script of scripts) {
-      appendScript(name, script);
+    for (const script of loadingScripts) {
+      const scriptTag = appendScript(script);
+      scriptTag.addEventListener('load', () => {
+        loadingScripts.splice(loadingScripts.indexOf(script), 1);
+        this.#checkLoaded(dependency, loadingStyles, loadingScripts);
+      });
     }
 
-    this.loaded.push(dependency);
+    // set loaded to false
+    this.loadedStatus[dependency] = false;
       
   }
 
@@ -101,23 +154,28 @@ class Depends {
   }
 
   /**
-   * 
-   * @param {string|array} dependency 
+   * Load a <script> tag every time called
+   * @param {string} id 
+   * @param {object} attributes 
+   * @param {array} dependencies 
    */
-  setLoaded(dependency) {
+  load(name, src, dependencies = [], loadOnce = false) {
 
-    const dependencies = [];
-    if (typeof dependency === "string") {
-      if (!this.loaded.includes(dependency)) {
-        this.loaded.push(dependency);
-      }
-    } else if (Array.isArray(dependency)) {
-      dependencies.push(...dependency)
+    if (loadOnce && name in this.loadedStatus) {
+      return;
     }
-    
-    for (const dependency of dependencies) {
-      this.loaded.push(dependency);
+
+    // append this script now dependencies have been loaded
+    if (typeof src === "function") {      
+      this.loadDependencies(dependencies);
+      this.pendingCallbacks.push([name, src, dependencies]);    
+    } else {
+      this.loadDependencies(dependencies);
+      appendScript(src);
     }
+
+    // set to is loading
+    this.loadedStatus[name] = false;
 
   }
 
@@ -127,32 +185,9 @@ class Depends {
    * @param {object} attributes 
    * @param {array} dependencies 
    */
-  load(name, src, dependencies = [], loadOnce = false) {
-
-    if (loadOnce && this.loaded.has(name)) {
-      return;
-    }
-
-    // ensure all dependencies have been loaded
-    this.loadDependencies(dependencies);
-
-    // append this script now dependencies have been loaded
-    appendScript(name, src);
-
+  loadOnce(name, attributes, dependencies) {
+    return this.load(name, attributes, dependencies, true);
   }
-
-  // /**
-  //  * Load a <script> tag every time called
-  //  * @param {string} id 
-  //  * @param {object} attributes 
-  //  * @param {array} dependencies 
-  //  */
-  // loadOnce(id, attributes, dependencies) {
-
-    
-
-  //   return this.load(id, attributes, dependencies);
-  // }
 }
 
 // Create an instance of the Depends class
