@@ -8,7 +8,7 @@ Dependency manager for web pages. Ensures that dependency styles and script are 
 <script src="path/to/depends.min.js">
 ```
 
-Appended scripts will be added to the end of the document.body
+Appended scripts will be added to document.body. Appended styles will be added to document.head.
 
 ## Register dependencies
 
@@ -19,22 +19,6 @@ Register a single dependency for other scripts to reference. When a string is th
 ```javascript
 depends.register({
   "vue@3": "https://unpkg.com/vue@3/dist/vue.global.js",
-});
-```
-
-Calling register multiple times will do a top level merge:
-
-```javascript
-depends.register({
-  "jquery": "https://code.jquery.com/jquery-3.7.1.min.js",
-  "vue": { // object
-    "https://unpkg.com/vue@2/dist/vue.global.js",
-    "crossorigin": "anonymous",
-  },
-});
-
-depends.register({
-  "vue": "https://unpkg.com/vue@3/dist/vue.global.js", // string will overwrite object
 });
 ```
 
@@ -87,10 +71,20 @@ depends.register({
 });
 ```
 
-If we know registered dependencies have already been loaded, this will prevent scripts and styles being appended when a script has those dependencies. Useful for e.g. our CMS layout has already included dependencies such as jQuery, Bootstrap, etc.
+Calling register multiple times will do a top level merge:
 
 ```javascript
-depends.setLoaded(["bootstrap@5.2", "jquery@3.0"]);
+depends.register({
+  "jquery": "https://code.jquery.com/jquery-3.7.1.min.js",
+  "vue": { // object
+    "https://unpkg.com/vue@2/dist/vue.global.js",
+    "crossOrigin": "anonymous",
+  },
+});
+
+depends.register({
+  "vue": "https://unpkg.com/vue@3/dist/vue.global.js", // string will overwrite object
+});
 ```
 
 ## Load script
@@ -118,12 +112,28 @@ The following will first append dependencies (only if another script hasn't appe
 depends.load("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
 ```
 
-Or run code that has dependencies:
+## Queue callback
+
+Callback will only run after dependencies loaded
 
 ```javascript
 depends.load("featured-new", () => {
   // code here
 }, ["jquery@3.0"]);
+```
+
+## loadOnce
+
+Append a `<script>` or queue callback once only
+
+```javascript
+depends.loadOnce("global", { // appended
+  "src": "js/global.js",
+}, ["jquery@3.4.1"]);
+
+depends.loadOnce("global", { // ignored, global already appended
+  "src": "js/global.js",
+}, ["jquery@3.4.1"]);
 ```
 
 ## Load dependency
@@ -151,38 +161,6 @@ depends.loadDependency(["jquery@3.0"]);
 
 
 
-Append a `<script>` once only
-
-```javascript
-depends.loadOnce("global", { // appended
-  "src": "js/global.js",
-}, ["jquery@3.4.1"]);
-
-depends.loadOnce("global", { // ignored, featured-news already appended
-  "src": "js/global.js",
-}, ["jquery@3.4.1"]);
-```
-
-Run a callback when dependencies are met
-
-```javascript
-depends.load("featured-news", () => {
-  // code
-}, ["vue@2", "jquery.isotope@3.0.6"]);
-```
-
-Will register callback on dom event ready (e.g. DOMContentLoaded) dependencies are met.
-
-```javascript
-depends.load("featured-news", () => {
-  // code
-}, ["vue@2", "jquery.isotope@3.0.6"], "DOMContentLoaded");
-
-depends.loadOnce("featured-news", () => {
-  // code
-}, ["vue@2", "jquery.isotope@3.0.6"], "DOMContentLoaded");
-```
-
 ## Local development
 
 Install dependencies
@@ -207,4 +185,4 @@ $ npm run start
 
 Tests are run in QUnit. Use a VS Code plugin like Live Server
 
-http://localhost:5000/tests/
+http://localhost:5501/tests/
