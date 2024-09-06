@@ -89,10 +89,10 @@ depends.register({
 
 ## Load script
 
-Load script with no dependencies
+We can let load handle loading dependencies automatically. 
 
 ```javascript
-depends.load("featured-new", "js/featured-news.bundle.js");
+depends.load("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
 ```
 
 Or as an object:
@@ -101,15 +101,8 @@ Or as an object:
 depends.load("featured-new", {
   "src": "js/featured-news.bundle.js",
   "data-random": "peanut butter curry",
-});
+}, ["jquery@3.0"]);
 ```
-
-We can let load handle loading dependencies automatically. 
-
-The following will first append dependencies (only if another script hasn't appended it already) then append featured-new script:
-
-```javascript
-depends.load("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
 ```
 
 ## Queue callback
@@ -150,20 +143,7 @@ Or, as an array:
 depends.loadDependency(["jquery@3.0"]);
 ```
 
-
-
-
-
-
-
-
-
-
-
-
 ## Local development
-
-Install dependencies
 
 ```
 $ npm i
@@ -185,4 +165,4 @@ $ npm run start
 
 Tests are run in QUnit. Use a VS Code plugin like Live Server
 
-http://localhost:5501/tests/
+http://localhost:5501/tests/ (port may differ)
