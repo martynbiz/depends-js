@@ -21,7 +21,7 @@ class Depends {
   register(dependencies) {
 
     // Store the provided dependencies in the instance
-    this.dependencies = { ...this.dependencies, ...dependencies };
+    this.dependencies = { ...this.dependencies, ...dependencies };    
 
   }
 
@@ -118,7 +118,7 @@ class Depends {
     for (const dependency of dependencies) {
       this.loaded.push(dependency);
     }
-    
+
   }
 
   /**
@@ -127,24 +127,17 @@ class Depends {
    * @param {object} attributes 
    * @param {array} dependencies 
    */
-  loadScript(id, src, dependencies = [], loadOnce = false) {
+  load(name, src, dependencies = [], loadOnce = false) {
 
-    if (loadOnce && this.loaded.has(id)) {
+    if (loadOnce && this.loaded.has(name)) {
       return;
     }
-
-    // // check dependencies loaded first
-    // if (dependencies.length > 0) {
-    //   return loadDependencies(dependencies, () => {
-    //     this.load(id, src);
-    //   });
-    // }
 
     // ensure all dependencies have been loaded
     this.loadDependencies(dependencies);
 
     // append this script now dependencies have been loaded
-    appendScript(id, src);
+    appendScript(name, src);
 
   }
 

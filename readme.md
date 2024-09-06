@@ -27,14 +27,14 @@ Calling register multiple times will do a top level merge:
 ```javascript
 depends.register({
   "jquery": "https://code.jquery.com/jquery-3.7.1.min.js",
-  "vue": {
+  "vue": { // object
     "https://unpkg.com/vue@2/dist/vue.global.js",
     "crossorigin": "anonymous",
   },
 });
 
 depends.register({
-  "vue": "https://unpkg.com/vue@3/dist/vue.global.js", // will overwrite object with string
+  "vue": "https://unpkg.com/vue@3/dist/vue.global.js", // string will overwrite object
 });
 ```
 
@@ -87,21 +87,35 @@ depends.register({
 });
 ```
 
-If we know dependencies have already been loaded, this will prevent scripts and styles being appended when a script has those dependencies. Useful for e.g. our CMS layout has already included dependencies such as jQuery, Bootstrap, etc.
+If we know registered dependencies have already been loaded, this will prevent scripts and styles being appended when a script has those dependencies. Useful for e.g. our CMS layout has already included dependencies such as jQuery, Bootstrap, etc.
 
 ```javascript
 depends.setLoaded(["bootstrap@5.2", "jquery@3.0"]);
 ```
 
-### Load script
+## Load script
 
-The following will first append dependencies (only if another script hasn't appended it already) then append featured-new script:
+Load script with no dependencies
+
+```javascript
+depends.loadScript("featured-new", "js/featured-news.bundle.js");
+```
+
+Or as an object:
 
 ```javascript
 depends.loadScript("featured-new", {
   "src": "js/featured-news.bundle.js",
   "data-random": "peanut butter curry",
-}, ["jquery@3.0"]);
+});
+```
+
+We can let loadScript handle loading dependencies automatically. 
+
+The following will first append dependencies (only if another script hasn't appended it already) then append featured-new script:
+
+```javascript
+depends.loadScript("featured-new", "js/featured-news.bundle.js", ["jquery@3.0"]);
 ```
 
 ## Load dependency

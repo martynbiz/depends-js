@@ -53,6 +53,30 @@ QUnit.module('depends', function(hooks) {
 
   });
   
+  QUnit.test('test loadDependency with multiple register calls', function(assert) {
+    
+    // test
+    depends.register({
+      "dep1": "dep1.js",
+      "dep2": "dep2.js",
+    });
+    depends.register({
+      "dep1": {
+        "script": {
+          "src": "dep1_copy.js",
+        },
+      }
+    });
+    depends.loadDependencies(["dep1", "dep2"]);
+
+    // assert
+    const scripts = getScripts();
+    assert.equal(scripts.length, 2);    
+    assert.true(scripts[0].src.endsWith("dep1_copy.js"));
+    assert.true(scripts[1].src.endsWith("dep2.js"));
+
+  });
+  
   QUnit.test('test loadDependencies', function(assert) {
     
     // test
@@ -291,72 +315,49 @@ QUnit.module('depends', function(hooks) {
 
   });
   
-  // QUnit.test('test load appends script with script-src string', function(assert) {
-  //   depends.load("test", "test.js");
-  //   assert.true(!!document.querySelector(`script[src="test.js"]`));
-  // });
+  QUnit.test('test load appends script with script-src string', function(assert) {
+    
+    // test 
+    depends.load("test", "test.js");
+    
+    // assert 
+    const scripts = getScripts();
+    assert.equal(scripts.length, 1);
+    assert.true(scripts[0].src.endsWith("test.js"));
+
+  });
   
-  // QUnit.test('test load appends script with src as object', function(assert) {
-  //   depends.load("test", { src: "test.js", "data-test": "test" });
-  //   assert.true(!!document.querySelector(`script[src="test.js"][data-test="test"]`));
-  // });
+  QUnit.test('test load appends script with src as object', function(assert) {
+    depends.load("test", { src: "test.js", "data-test": "test" });
+    assert.true(!!document.querySelector(`script[src="test.js"][data-test="test"]`));
+  });
   
-  // QUnit.test('test load appends script multiple times', function(assert) {
-  //   depends.load("test", "test.js");
-  //   depends.load("test", "test.js");
-  //   depends.load("test", "test.js");
-  //   assert.equal(document.querySelectorAll(`script[src="test.js"]`).length, 3);
-  // });
+  QUnit.test('test load appends script multiple times', function(assert) {
+    depends.load("test", "test.js");
+    depends.load("test", "test.js");
+    depends.load("test", "test.js");
+    assert.equal(document.querySelectorAll(`script[src="test.js"]`).length, 3);
+  });
+  
+  QUnit.test('test load with dependencies', function(assert) {
+    
+    // test
+    depends.register({
+      "dep1": "dep1.js",
+      "dep2": "dep2.js"
+    });
+    depends.load("test", "test.js", ["dep2", "dep1"]);
+
+    // assert
+    const scripts = getScripts();
+    assert.equal(scripts.length, 3)
+    assert.true(scripts[0].src.endsWith("dep2.js"));
+    assert.true(scripts[1].src.endsWith("dep1.js"));
+    assert.true(scripts[2].src.endsWith("test.js"));
+
+  });
 
   // // TODO test register does merge
-  
-  // QUnit.test('test loadDependencies appends script with src as strings', function(assert) {
-    
-  //   depends.register({
-  //     "dep1": "dep1.js",
-  //     "dep2": "dep2.js",
-  //   });
-  //   depends.loadDependencies("dep1");
-
-  //   const scripts = getScripts();
-
-  //   assert.true(/dep1\.js$/.test(scripts[0].src));
-  //   assert.true(/dep2\.js$/.test(scripts[1].src));
-  //   assert.true(/test\.js$/.test(scripts[2].src));
-    
-  // });
-  
-  // QUnit.test('test loadDependencies appends script with src as object', function(assert) {
-    
-  //   depends.register({
-  //     "dep1": "dep1.js",
-  //     "dep2": {
-  //       script: "dep2.js",
-  //       dependencies: ["dep1"]
-  //     },
-  //   });
-  //   depends.loadDependencies("dep1");
-
-  // });
-  
-  // QUnit.test('test loadDependencies loads dependency\'s dependencies', function(assert) {
-    
-  // });
-  
-  // QUnit.test('test load appends script with dependencies as strings', function(assert) {
-  //   depends.register({
-  //     "dep1": "dep1.js",
-  //     "dep2": "dep2.js",
-  //   });
-  //   depends.load("test", "test.js", ["dep1", "dep2"]);
-
-  //   const scripts = getScripts();
-
-  //   assert.true(/dep1\.js$/.test(scripts[0].src));
-  //   assert.true(/dep2\.js$/.test(scripts[1].src));
-  //   assert.true(/test\.js$/.test(scripts[2].src));
-    
-  // });
   
   // // // QUnit.test('test load appends script once only', function(assert) {
   // // //   depends.loadOnce("test", "test.js");
