@@ -92,12 +92,14 @@ depends.register({
 We can let load handle loading dependencies automatically. 
 
 ```javascript
+// name, src, dependencies
 depends.load("featured-new", "js/featured-news.bundle.js", ["jquery"]);
 ```
 
 Or as an object:
 
 ```javascript
+// name, {src, ..}, dependencies
 depends.load("featured-new", {
   "src": "js/featured-news.bundle.js",
   "data-random": "peanut butter curry",
@@ -109,6 +111,7 @@ depends.load("featured-new", {
 Callback will only run after dependencies loaded
 
 ```javascript
+// name, callback, dependencies
 depends.load("featured-new", () => {
   // code here
 }, ["jquery"]);
