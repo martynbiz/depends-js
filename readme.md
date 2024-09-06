@@ -10,9 +10,9 @@ Dependency manager for web pages. Ensures that dependency styles and script are 
 
 Appended scripts will be added to document.body. Appended styles will be added to document.head.
 
-## Register dependencies
+## register
 
-This should be run before we load any scripts with dependencies. They must be registered first.
+Register dependencies. This should be run before we load any scripts with dependencies. They must be registered first.
 
 Register a single dependency for other scripts to reference. When a string is the only value, it will assume this is the script src with no dependencies:
 
@@ -87,7 +87,7 @@ depends.register({
 });
 ```
 
-## Load script
+## load
 
 We can let load handle loading dependencies automatically. 
 
@@ -106,7 +106,7 @@ depends.load("featured-new", {
 }, ["jquery"]);
 ```
 
-## Queue callback
+### Queue callback
 
 Callback will only run after dependencies loaded
 
@@ -131,7 +131,7 @@ depends.loadOnce("global", { // ignored, global already appended
 }, ["jquery"]);
 ```
 
-## Load dependency
+## loadDependency
 
 Dependencies can be manually loaded instead rather than loading as a dependency of a script/callback. This is only required when a dependency must be loaded regardless if a script needs it. Otherwise, just allow dependencies to be loaded on a need by need basis.
 
