@@ -37,7 +37,7 @@ export const appendStyle = (href) => {
  * 
  * @param {str|object} src 
  */
-export const appendScript = (src) => {
+export const appendScript = (src) => {  
 
   // handle src as a string or an object
   const attr = {};
@@ -53,7 +53,7 @@ export const appendScript = (src) => {
 
   // set defaults
   script.defer = true;
-  script.async = true;
+  // script.async = true;
 
   // create <script> element
   for (let key in attr) {

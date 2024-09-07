@@ -1,3 +1,7 @@
+/*
+- detect file extension when string or [string]
+*/
+
 import { appendStyle, appendScript } from "./functions";
 
 class Depends {
@@ -9,8 +13,9 @@ class Depends {
     // loadedStatus to dom 
     this.loadedStatus = {};
 
-    // loadedStatus to dom 
+    // these are callbacks that are awaiting dependencies loading
     this.pendingCallbacks = [];
+
   }
 
   /**
@@ -19,6 +24,7 @@ class Depends {
   reset() {
     this.dependencies = {};
     this.loadedStatus = {};
+    this.pendingCallbacks = [];
   }
 
   /**
@@ -28,7 +34,7 @@ class Depends {
   register(dependencies) {
 
     // Store the provided dependencies in the instance
-    this.dependencies = { ...this.dependencies, ...dependencies };    
+    this.dependencies = { ...this.dependencies, ...dependencies };
 
   }
 
@@ -73,7 +79,7 @@ class Depends {
    * @param {array} dependencies 
    * @param {function} callback Run when dependencies loaded 
    */
-  loadDependency(dependency, cb = () => {}) {
+  loadDependency(dependency) {
 
     const dependencies = [];
     if (typeof dependency === "string") {
@@ -165,17 +171,22 @@ class Depends {
     if (loadOnce && name in this.loadedStatus) {
       return;
     }
+    
+    // prep out pending callback
+    const callback = [name, src, dependencies];
+    if (typeof src !== "function") {
+      callback[1] = () => {               
+        appendScript(src);
+      }
+    }
 
     // append this script now dependencies have been loaded
-    if (typeof src === "function") {      
+    // only push to pending if dependencies
+    if (dependencies.length === 0) {
+      callback[1]();
+    } else {      
       this.loadDependency(dependencies);
-      this.pendingCallbacks.push([name, src, dependencies]);    
-    } else {
-      this.loadDependency(dependencies);
-      // appendScript(src);
-      this.pendingCallbacks.push([name, () => {
-        appendScript(src);
-      }, dependencies]);    
+      this.pendingCallbacks.push(callback); 
     }
 
     // set to is loading

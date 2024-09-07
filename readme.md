@@ -1,3 +1,6 @@
+TODO
+- dependencies with dependencies cannot load until those dependencies have loaded??
+
 # Depends JS
 
 Dependency manager for web pages. Ensures that dependency styles and script are only loaded once, even when multiple scripts rely on the same dependency (e.g. Vue). Provides a dependency manager for CMSs such as Terminalfour that don't have a dependency manager built in. Dependencies can be pulled from CDNs as an alternative to bundling - this is useful when e.g. a page has multiple Vue scripts where Vue is pulled in once from CDN.
@@ -16,11 +19,22 @@ Appended scripts will be added to document.body. Appended styles will be added t
 
 Register dependencies. This should be run before we load any scripts with dependencies.
 
-Register a single dependency for other scripts to reference. When a string is the only value, it will assume this is the script src with no dependencies:
+Register a single dependency for other scripts to reference. When a string is the only value, it will detect the file extension to determine whether it's a script or stylesheet:
 
 ```javascript
 depends.register({
   "vue": "https://unpkg.com/vue@3/dist/vue.global.js",
+});
+```
+
+Can also pass an array of strings where file extension will append as a script or a stylesheet:
+
+```javascript
+depends.register({
+  "bootstrap": [
+    "../bootstrap.css",
+    "../bootstrap.js"
+  ],
 });
 ```
 
