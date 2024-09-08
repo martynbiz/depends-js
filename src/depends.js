@@ -56,35 +56,41 @@ class Depends {
    * @param {array} loadingStyles 
    * @param {array} loadingScripts 
    */
-  #checkLoaded(dependency, loadingStyles, loadingScripts) {    
+  #checkLoaded(dependency, loadingStyles, loadingScripts) {      
     
     // set loaded status true if all assets have loaded
-    this.loadedStatus[dependency] = (loadingStyles.length + loadingScripts.length === 0);
+    this.loadedStatus[dependency] = (loadingStyles.length + loadingScripts.length === 0);        
 
     // if loaded, check callbacks
     if (this.loadedStatus[dependency] === true) {
       this.#checkPendingCallbacks();
     }
+
   }
 
   /**
    * Should be called after a dependency is loaded
    */
-  #checkPendingCallbacks() {
-    
+  #checkPendingCallbacks() {    
+
     for (let i = 0; i < this.pendingCallbacks.length; i++) {
-      const pendingCallback = this.pendingCallbacks.shift();
+      const pendingCallback = this.pendingCallbacks.shift();    
+      
       const [name, cb, dependencies] = pendingCallback;
+
       if (this.#hasDependencies(dependencies)) {
         cb();
-        this.loadedStatus[name] = true;
+        if (name !== null) {
+          this.loadedStatus[name] = true;
+        }
       } else {
         this.pendingCallbacks.push(pendingCallback);
       }
     }
+
   }
 
-  #appendDependency(dependency) {
+  #appendDependency(dependencyName, dependency) {
       
     const loadingScripts = [];
     const loadingStyles = [];
@@ -104,11 +110,11 @@ class Depends {
       }
 
       // check loadingScripts, might be undefined
-      if ("script" in dependency) {
+      if ("script" in dependency) {        
         if (Array.isArray(dependency.script)) {
           loadingScripts.push(...dependency.script);
-        } else {
-          loadingScripts.push(dependency.script);
+        } else {          
+          loadingScripts.push(dependency.script);          
         }
       }
       
@@ -119,18 +125,18 @@ class Depends {
     // append this style now dependencies have been loaded
     for (const style of loadingStyles) {
       const linkTag = appendStyle(style);
-      linkTag.addEventListener('load', () => {
+      linkTag.addEventListener('load', () => {        
         loadingStyles.splice(loadingStyles.indexOf(style), 1);
-        this.#checkLoaded(dependency, loadingStyles, loadingScripts);
+        this.#checkLoaded(dependencyName, loadingStyles, loadingScripts);
       });
-    }
+    }    
 
     // append this script now dependencies have been loaded
-    for (const script of loadingScripts) {
+    for (const script of loadingScripts) {      
       const scriptTag = appendScript(script);
       scriptTag.addEventListener('load', () => {
         loadingScripts.splice(loadingScripts.indexOf(script), 1);
-        this.#checkLoaded(dependency, loadingStyles, loadingScripts);
+        this.#checkLoaded(dependencyName, loadingStyles, loadingScripts);
       });
     }
 
@@ -150,7 +156,7 @@ class Depends {
       dependencies.push(...dependencyName)
     }
 
-    for (const dependencyName of dependencies) {
+    for (const dependencyName of dependencies) { 
 
       // check dependency is not already loadedStatus
       if (dependencyName in this.loadedStatus) {
@@ -158,23 +164,28 @@ class Depends {
       }
   
       // get dependency data 
-      const dependency = this.dependencies[dependencyName];
+      const dependency = this.dependencies[dependencyName];  
+      
   
       // set loaded to false
-      this.loadedStatus[dependency] = false;
-
-      console.log(dependency);      
+      this.loadedStatus[dependencyName] = false;
   
       // load this dependency's dependencies
       if (dependency && typeof dependency === 'object' && "dependencies" in dependency) {
+        
         this.loadDependency(dependency.dependencies);
-        this.pendingCallbacks.push([null, () => {
-          this.#appendDependency(dependency);
-        }, dependency.dependencies]);
-        return;
-      }
 
-      this.#appendDependency(dependency);
+        this.pendingCallbacks.push([null, () => {
+          this.#appendDependency(dependencyName, dependency);
+        }, dependency.dependencies]);
+
+        return;
+
+      } else {
+
+        this.#appendDependency(dependencyName, dependency);
+
+      }
       
     }
       
