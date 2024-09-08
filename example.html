@@ -57,10 +57,12 @@
       }
     });
 
-    depends.load("bootstrap-modal", () => {
-      const exampleModal = new bootstrap.Modal(document.getElementById('exampleModal'), {})
-      exampleModal.show();
-    }, ["bootstrap@5.2"]);
+    // depends.load("example", () => {
+    //   const exampleModal = new bootstrap.Modal(document.getElementById('exampleModal'), {})
+    //   exampleModal.show();
+    // }, ["bootstrap@5.2"]);
+
+    depends.load("example", "example.js", ["bootstrap@5.2"]);
 
   </script>
 </body>
