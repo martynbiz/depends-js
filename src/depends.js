@@ -56,13 +56,13 @@ class Depends {
    * @param {array} loadingStyles 
    * @param {array} loadingScripts 
    */
-  #checkLoaded(dependency, loadingStyles, loadingScripts) {      
+  #checkLoaded(dependency, loadingStyles, loadingScripts) {  
     
     // set loaded status true if all assets have loaded
     this.loadedStatus[dependency] = (loadingStyles.length + loadingScripts.length === 0);        
 
     // if loaded, check callbacks
-    if (this.loadedStatus[dependency] === true) {
+    if (this.loadedStatus[dependency] === true) {  
       this.#checkPendingCallbacks();
     }
 
@@ -71,22 +71,24 @@ class Depends {
   /**
    * Should be called after a dependency is loaded
    */
-  #checkPendingCallbacks() {    
+  #checkPendingCallbacks() { 
 
-    for (let i = 0; i < this.pendingCallbacks.length; i++) {
-      const pendingCallback = this.pendingCallbacks.shift();    
-      
-      const [name, cb, dependencies] = pendingCallback;
-
-      if (this.#hasDependencies(dependencies)) {
+    // first, process items and filter those we don't need as pending any more
+    const stillPending = this.pendingCallbacks.filter(callback => {
+      const [name, cb, dependencies] = callback;
+      if (this.#hasDependencies(dependencies)) {        
         cb();
         if (name !== null) {
           this.loadedStatus[name] = true;
-        }
-      } else {
-        this.pendingCallbacks.push(pendingCallback);
-      }
-    }
+        }        
+        return false;
+      }  
+      return true;
+    })
+
+    // loop/pop all old pending, and replace with new still pending
+    while(this.pendingCallbacks.length > 0) this.pendingCallbacks.pop();
+    this.pendingCallbacks.push(...stillPending);
 
   }
 
@@ -202,6 +204,7 @@ class Depends {
     if (loadOnce && name in this.loadedStatus) {
       return;
     }
+    
     
     // prep out pending callback
     const callback = [name, src, dependencies];
